@@ -1,98 +1,76 @@
-"""
-Gene expression preprocessing pipeline.
-
-This script implements a minimal and explicit preprocessing workflow for
-gene expression matrices before any multivariate analysis (PCA, clustering).
-
-Pipeline steps:
-1. Load raw count matrix
-2. Normalize to CPM (Counts Per Million)
-3. Apply log2(x + 1) transformation
-4. Save processed matrices as artifacts
-5. Generate diagnostic distribution plots
-6. Generate per-sample QC boxplots
-
-The goal is numerical conditioning and quality inspection of the data before 
-downstream analyses.
-"""
-
-from pipeline.io import load_counts
-from pipeline.normalization import cpm
-from pipeline.transform import log2_transform
-from pipeline.plots import plot_histogram, plot_sample_boxplots
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
 
-def main():
-    # ------------------------------------------------------------------
-    # Step 1 — Load raw expression matrix
-    # ------------------------------------------------------------------
-    print("Loading raw counts...")
-    counts = load_counts("data/raw/counts.csv")
-    print("✓ Step 1 finished: Raw counts loaded\n")
+# Global aesthetic style for all diagnostic figures
+# These plots are meant for exploratory QC, not final publication figures
+sns.set_theme(style="whitegrid", context="talk")
 
-    # ------------------------------------------------------------------
-    # Step 2 — CPM normalization
-    # ------------------------------------------------------------------
-    print("Applying CPM normalization...")
-    cpm_matrix = cpm(counts)
-    print("✓ Step 2 finished: CPM normalization applied\n")
 
-    # ------------------------------------------------------------------
-    # Step 3 — Log2 transformation
-    # ------------------------------------------------------------------
-    print("Applying log2 transformation...")
-    log_matrix = log2_transform(cpm_matrix)
-    print("✓ Step 3 finished: log2 transformation applied\n")
 
-    # ------------------------------------------------------------------
-    # Step 4 — Save processed matrices as pipeline artifacts
-    # ------------------------------------------------------------------
-    print("Saving processed matrices...")
-    cpm_matrix.to_csv("outputs/matrices/cpm_matrix.csv")
-    log_matrix.to_csv("outputs/matrices/log2_cpm_matrix.csv")
-    print("✓ Step 4 finished: matrices saved to outputs/matrices/\n")
+def plot_histogram(matrix: pd.DataFrame, title: str, output_path: str):
+    """
+    Plot and save a histogram of all values in an expression matrix.
 
-    # ------------------------------------------------------------------
-    # Step 5 — Generate global distribution diagnostics
-    # ------------------------------------------------------------------
-    print("Generating diagnostic histograms...")
+    This function is used for global distribution inspection to detect:
+    - scale issues
+    - extreme skewness
+    - heavy tails or compression of values
 
-    plot_histogram(
-        cpm_matrix,
-        title="Distribution of CPM values",
-        output_path="outputs/figures/cpm_histogram.png"
+    Expected input:
+    - rows = genes
+    - columns = samples
+    """
+
+    # Flatten matrix values into a single vector for global distribution
+    values = matrix.values.flatten()
+
+    plt.figure(figsize=(7, 5))
+    plt.hist(values, bins=30)
+    plt.title(title)
+    plt.xlabel("Value")
+    plt.ylabel("Frequency")
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+
+
+
+
+def plot_sample_boxplots(matrix: pd.DataFrame, outpath: str, title: str):
+    """
+    Generate one boxplot per sample to inspect distribution and scale differences.
+
+    This plot is used to detect:
+    - library size effects
+    - scale inconsistencies
+    - outliers and abnormal samples
+
+    Expected input:
+    - rows = genes
+    - columns = samples
+    """
+
+    plt.figure(figsize=(9, 5))
+
+    # Convert matrix from wide format (genes x samples)
+    # to long format for seaborn plotting
+    melted = (
+        matrix.reset_index()
+        .melt(id_vars="gene", var_name="Sample", value_name="Expression")
     )
 
-    plot_histogram(
-        log_matrix,
-        title="Distribution of log2(CPM + 1) values",
-        output_path="outputs/figures/log2_cpm_histogram.png"
+    sns.boxplot(
+        data=melted,
+        x="Sample",
+        y="Expression"
     )
 
-    print("✓ Step 5 finished: diagnostic histograms saved to outputs/figures/\n")
+    plt.title(title)
+    plt.ylabel("Expression value")
+    plt.xlabel("Sample")
 
-    # ------------------------------------------------------------------
-    # Step 6 — Generate per-sample QC boxplots
-    # ------------------------------------------------------------------
-    print("Generating per-sample QC boxplots...")
-
-    plot_sample_boxplots(
-        log_matrix,
-        "outputs/figures/boxplot_log2cpm_per_sample.png",
-        "log2(CPM) distribution per sample"
-    )
-
-    print("✓ Step 6 finished: QC boxplots generated\n")
-
-    # ------------------------------------------------------------------
-    # Final preview (sanity check)
-    # ------------------------------------------------------------------
-    print("CPM-normalized matrix (preview):")
-    print(cpm_matrix)
-
-    print("\nLog2-transformed matrix (preview):")
-    print(log_matrix)
-
-
-if __name__ == "__main__":
-    main()
+    plt.tight_layout()
+    plt.savefig(outpath, dpi=150)
+    plt.close()
