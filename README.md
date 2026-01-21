@@ -97,15 +97,11 @@ outputs/figures/boxplot_log2cpm_per_sample.png
 
 ## How to run
 
-1. Install dependencies:
+1. Install dependencies: ```pip install -r requirements.txt```
 
-```text pip install -r requirements.txt```
+2. Run the pipeline: ```python run_preprocessing.py```
 
-2. Run the pipeline:
-
-```text python run_preprocessing.py```
-
-All outputs will be written to the ```text outputs/``` folder.
+All outputs will be written to the ```outputs/``` folder.
 
 ---
 
