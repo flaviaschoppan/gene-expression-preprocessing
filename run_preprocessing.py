@@ -1,6 +1,7 @@
 from pipeline.io import load_counts
 from pipeline.normalization import cpm 
 from pipeline.transform import log2_transform
+from pipeline.plots import plot_histogram
 
 
 def main():
@@ -27,6 +28,23 @@ def main():
 
     print("Log2-transformed matrix (preview):")
     print(log_matrix)
+
+    print("Generating diagnostic plots...")
+
+    plot_histogram(
+        cpm_matrix,
+        title="Distribution of CPM values",
+        output_path="outputs/figures/cpm_histogram.png"
+    )
+
+    plot_histogram(
+        log_matrix,
+        title="Distribuition of log2(COM + 1) values",
+        output_path="outputs/figures/log2_cpm_histogram.png"
+    )
+    
+
+    print("✓ Step 5 finished: diagnostic plots saved to outputs/figures/\n")
 
 
 if __name__ == "__main__":
