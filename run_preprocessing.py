@@ -16,6 +16,12 @@ def main():
     log_matrix = log2_transform(cpm_matrix)
     print("✓ Step 3 finished: log2 transformation applied\n")    
 
+    print ("Saving processed matrices...")
+    cpm_matrix.to_csv("outputs/matrices/cpm_matrix.csv")
+    log_matrix.to_csv("outputs/matrices/log2_cpm_matrix.csv")
+    print("✓ Step 4 finished: matrices saved to outputs/matrices/\n")  
+
+
     print("CPM-normalized matrix (preview):")
     print(cpm_matrix)
 
