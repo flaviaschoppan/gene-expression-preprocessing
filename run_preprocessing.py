@@ -2,6 +2,7 @@ from pipeline.io import load_counts
 from pipeline.normalization import cpm 
 from pipeline.transform import log2_transform
 from pipeline.plots import plot_histogram
+from pipeline.plots import plot_sample_boxplots 
 
 
 def main():
@@ -42,9 +43,19 @@ def main():
         title="Distribuition of log2(COM + 1) values",
         output_path="outputs/figures/log2_cpm_histogram.png"
     )
-    
 
     print("✓ Step 5 finished: diagnostic plots saved to outputs/figures/\n")
+
+
+    print("Generating QC boxplots...")
+
+    plot_sample_boxplots(
+        cpm_matrix,
+        "outputs/figures/boxplot_log2cpm_per_sample.png",
+        "log2(CPM) distribution per sample"
+    )
+
+    print("✓ Step 6 finished: QC boxplots generated\n")
 
 
 if __name__ == "__main__":
