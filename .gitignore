@@ -1,10 +1,45 @@
-# Python cache
+# =========================
+# Internal documentation (private)
+# =========================
+README_FULL.md
+README_FULL*.md
+
+# =========================
+# Personal / notes
+# =========================
+notes.md
+
+# =========================
+# Python cache / bytecode
+# =========================
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 
-# Virtual env (se usar no futuro)
+# =========================
+# Virtual environments
+# =========================
 .venv/
 venv/
+env/
 
-# Outputs gerados automaticamente
+# =========================
+# IDE / Editor files
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Generated data & outputs
+# =========================
+data/example_results.csv
 outputs/
+*.png
+qc_report.txt
